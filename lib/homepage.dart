@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flappy_bird/barrier.dart';
 import 'package:flappy_bird/bird.dart';
+import 'package:flappy_bird/theme_provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,24 +34,32 @@ class _HomePageState extends State<HomePage> {
     [0.4, 0.6],
   ];
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void startGame() {
-    gameHasStarted = true;
-    Timer.periodic(const Duration(milliseconds: 10), (timer) {
-      height = gravity * time * time + velocity * time;
+    if (mounted) {
+      gameHasStarted = true;
+      Timer.periodic(
+        const Duration(milliseconds: 10),
+        (timer) {
+          height = gravity * time * time + velocity * time;
 
-      setState(() {
-        birdY = initialPos - height;
-      });
+          setState(() {
+            birdY = initialPos - height;
+          });
 
-      if (birdIsDead()) {
-        timer.cancel();
-        _showDialog();
-      }
-
-      moveMap();
-
-      time += 0.01;
-    });
+          if (birdIsDead()) {
+            timer.cancel();
+            _showDialog();
+          }
+          moveMap();
+          time += 0.01;
+        },
+      );
+    }
   }
 
   void moveMap() {
@@ -59,6 +70,9 @@ class _HomePageState extends State<HomePage> {
 
       if (barrierX[i] < -1.5) {
         barrierX[i] += 3;
+        setState(() {
+          score += 2;
+        });
       }
     }
   }
@@ -77,41 +91,43 @@ class _HomePageState extends State<HomePage> {
 
   void _showDialog() {
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: Colors.brown,
-            title: const Text(
-              'GAME  OVER',
-              style: TextStyle(color: Colors.white),
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          title: Text(
+            'GAME  OVER',
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+          ),
+          content: Text(
+            'Score: $score',
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'PLAY  AGAIN',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              ),
+              onPressed: () {
+                if (score > topScore) {
+                  topScore = score;
+                }
+                resetGame();
+                // initState();
+                // setState(() {
+                //   gameHasStarted = false;
+                // });
+                // startGame();
+                // Navigator.of(context).pop();
+              },
             ),
-            content: Text(
-              'Score: $score',
-              style: const TextStyle(color: Colors.white),
-            ),
-            actions: [
-              TextButton(
-                child: const Text(
-                  'PLAY  AGAIN',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onPressed: () {
-                  resetGame();
-                  if (score > topScore) {
-                    topScore = score;
-                  }
-                  initState();
-                  setState(() {
-                    gameHasStarted = false;
-                    startGame();
-                  });
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 
   void jump() {
@@ -138,110 +154,145 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: gameHasStarted ? jump : startGame,
-      child: Scaffold(
-        body: Column(
-          children: [
-            Expanded(
-              flex: 3,
-              child: Container(
-                color: Colors.blue,
-                child: Center(
+    return SafeArea(
+      child: GestureDetector(
+        onTap: gameHasStarted ? jump : startGame,
+        child: Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  color: Theme.of(context).colorScheme.surface,
+                  child: Center(
                     child: Stack(
-                  children: [
-                    MyBird(
-                      birdY: birdY,
-                      birdWidth: birdWidth,
-                      birdHeight: birdHeight,
-                    ),
-                    MyBarrier(
-                      barrierX: barrierX[0],
-                      barrierWidth: barrierWidth,
-                      barrierHeight: barrierHeight[0][0],
-                      isThisBottomBarrier: false,
-                    ),
-                    MyBarrier(
-                      barrierX: barrierX[0],
-                      barrierWidth: barrierWidth,
-                      barrierHeight: barrierHeight[0][1],
-                      isThisBottomBarrier: true,
-                    ),
-                    MyBarrier(
-                      barrierX: barrierX[1],
-                      barrierWidth: barrierWidth,
-                      barrierHeight: barrierHeight[1][0],
-                      isThisBottomBarrier: false,
-                    ),
-                    MyBarrier(
-                      barrierX: barrierX[1],
-                      barrierWidth: barrierWidth,
-                      barrierHeight: barrierHeight[1][1],
-                      isThisBottomBarrier: true,
-                    ),
-                    Container(
-                      alignment: const Alignment(0, -0.5),
-                      child: Text(
-                        gameHasStarted ? '' : 'TAP  TO  PLAY',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                      ),
-                    )
-                  ],
-                )),
-              ),
-            ),
-            Container(
-              height: 15,
-              color: Colors.green,
-            ),
-            Expanded(
-              child: Container(
-                color: Colors.brown,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'SCORE',
-                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        gameHasStarted
+                            ? const SizedBox()
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'Dark Mode',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface),
+                                    ),
+                                    CupertinoSwitch(
+                                      value: Provider.of<ThemeProvider>(context,
+                                              listen: false)
+                                          .isDarkMode,
+                                      onChanged: (value) =>
+                                          Provider.of<ThemeProvider>(context,
+                                                  listen: false)
+                                              .toggleTheme(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                        MyBird(
+                          birdY: birdY,
+                          birdWidth: birdWidth,
+                          birdHeight: birdHeight,
                         ),
-                        const SizedBox(
-                          height: 20,
+                        MyBarrier(
+                          barrierX: barrierX[0],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[0][0],
+                          isThisBottomBarrier: false,
                         ),
-                        Text(
-                          score.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 35),
-                        )
+                        MyBarrier(
+                          barrierX: barrierX[0],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[0][1],
+                          isThisBottomBarrier: true,
+                        ),
+                        MyBarrier(
+                          barrierX: barrierX[1],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[1][0],
+                          isThisBottomBarrier: false,
+                        ),
+                        MyBarrier(
+                          barrierX: barrierX[1],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[1][1],
+                          isThisBottomBarrier: true,
+                        ),
+                        Container(
+                          alignment: const Alignment(0, -0.5),
+                          child: Text(
+                            gameHasStarted ? '' : 'TAP  TO  PLAY',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'BEST',
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          topScore.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 35),
-                        )
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              Container(
+                height: 15,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'SCORE',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                fontSize: 20),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            score.toString(),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                fontSize: 35),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'BEST',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                fontSize: 20),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            topScore.toString(),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                fontSize: 35),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
