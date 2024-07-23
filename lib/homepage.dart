@@ -32,6 +32,10 @@ class _HomePageState extends State<HomePage> {
   List<List<double>> barrierHeight = [
     [0.6, 0.4],
     [0.4, 0.6],
+    [0.5, 0.3],
+    [0.3, 0.5],
+    // [0.6, 0.35],
+    // [0.35, 0.6],
   ];
 
   @override
@@ -222,6 +226,54 @@ class _HomePageState extends State<HomePage> {
                           barrierHeight: barrierHeight[1][1],
                           isThisBottomBarrier: true,
                         ),
+                        MyBarrier(
+                          barrierX: barrierX[0],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[2][0],
+                          isThisBottomBarrier: true,
+                        ),
+                        MyBarrier(
+                          barrierX: barrierX[0],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[2][1],
+                          isThisBottomBarrier: true,
+                        ),
+                        MyBarrier(
+                          barrierX: barrierX[1],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[3][0],
+                          isThisBottomBarrier: true,
+                        ),
+                        MyBarrier(
+                          barrierX: barrierX[1],
+                          barrierWidth: barrierWidth,
+                          barrierHeight: barrierHeight[3][1],
+                          isThisBottomBarrier: true,
+                        ),
+                        // MyBarrier(
+                        //   barrierX: barrierX[0],
+                        //   barrierWidth: barrierWidth,
+                        //   barrierHeight: barrierHeight[4][0],
+                        //   isThisBottomBarrier: true,
+                        // ),
+                        // MyBarrier(
+                        //   barrierX: barrierX[0],
+                        //   barrierWidth: barrierWidth,
+                        //   barrierHeight: barrierHeight[4][1],
+                        //   isThisBottomBarrier: true,
+                        // ),
+                        // MyBarrier(
+                        //   barrierX: barrierX[1],
+                        //   barrierWidth: barrierWidth,
+                        //   barrierHeight: barrierHeight[5][0],
+                        //   isThisBottomBarrier: true,
+                        // ),
+                        // MyBarrier(
+                        //   barrierX: barrierX[1],
+                        //   barrierWidth: barrierWidth,
+                        //   barrierHeight: barrierHeight[5][1],
+                        //   isThisBottomBarrier: true,
+                        // ),
                         Container(
                           alignment: const Alignment(0, -0.5),
                           child: Text(
